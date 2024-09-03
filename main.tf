@@ -1,7 +1,7 @@
 provider "aws" {
   region     = "us-east-1"
-  access_key = "AKIA6ELKN27TGXST3QMF"
-  secret_key = "d4cqHLr08/SanAEnLq2Jxv4JzHpGb4i7YbPH64EU"
+  access_key = "your-access-key" # can parametrise these and store in S3 Bucket/Storage account or any vault
+  secret_key = "your-secrete-key"
 }
 
 # Creating a first EC2 instance
@@ -120,18 +120,14 @@ resource "aws_eip" "one" {
   domain                    = "vpc"
   network_interface         = aws_network_interface.web-server-nic.id
   associate_with_private_ip = "10.0.1.50"
-  depends_on                = [aws_internet_gateway.gw]
-}
-
-output "server_public_ip" {
-  value = aws_eip.one.public_ip
+  depends_on                = [aws_internet_gateway.gw, aws_instance.web-server-instance] # added a dependency on EC2 instance # alternate, run terraform apply twice
 }
 
 
 # # 9. Create Ubuntu server and install/enable apache2
 
 resource "aws_instance" "web-server-instance" {
-  ami               = "ami-066784287e358dad1"
+  ami               = "ami-0a0e5d9c7acc336f1"
   instance_type     = "t2.micro"
   availability_zone = "us-east-1a"
   key_name          = "main-key"
@@ -153,7 +149,10 @@ resource "aws_instance" "web-server-instance" {
   }
 }
 
-
+# Output public and private IP to connect and SSH into
+output "server_public_ip" {
+  value = aws_eip.one.public_ip
+}
 output "server_private_ip" {
   value = aws_instance.web-server-instance.private_ip
 }
